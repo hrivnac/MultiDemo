@@ -1,0 +1,57 @@
+: 1681481759:0;source setup.sh
+: 1681481762:0;which java
+: 1681481765:0;ant
+: 1681481774:0;mkdir ../extlib
+: 1681481775:0;ant
+: 1681481817:0;ant -v
+: 1681481859:0;ant
+: 1681481946:0;which java
+: 1681481973:0;ant
+: 1681481985:0;source setup.sh
+: 1681481986:0;ant
+: 1681482002:0;ant -v
+: 1681482042:0;ll /opt/graalvm
+: 1681482052:0;su
+: 1681482058:0;cd /opt
+: 1681482093:0;rm -rf ../build/*
+: 1681482100:0;source setup.sh
+: 1681482102:0;ant jar
+: 1681482117:0;ant compile
+: 1681482229:0;ant jar
+: 1681482242:0;java -jar ../lib/MultiDemo.exe.jar
+: 1681482253:0;ll ../lib
+: 1681482262:0;rm ../lib/Grapher-00.00.00x.jar
+: 1681482268:0;jar tvf ../lib/MultiDemo.exe.jar
+: 1681482302:0;ant jar
+: 1681482305:0;java -jar ../lib/MultiDemo.exe.jar
+: 1681483605:0;which java
+: 1681483661:0;java -jar ../lib/MultiDemo.exe.jar <<EOF\
+{"GraalVM":{"description":"Language Abstraction Platform","supports":["combining languages","embedding languages","creating native images"],"languages": ["Java","JavaScript","Node.js", "Python", "Ruby","R","LLVM"]}}\
+EOF
+: 1681483822:0;ant compile-native
+: 1681483908:0;ls
+: 1681483913:0;ls ../bin
+: 1681483931:0;../bin/MultiDemo.exe <<EOF\
+{"GraalVM":{"description":"Language Abstraction Platform","supports":["combining languages","embedding languages","creating native images"],"languages": ["Java","JavaScript","Node.js", "Python", "Ruby","R","LLVM"]}}\
+EOF\
+
+: 1681483991:0;ant compile-native
+: 1681484230:0;nedit ../bin/check.sh&
+: 1681484235:0;../bin/MultiDemo.exe <<EOF\
+{"GraalVM":{"description":"Language Abstraction Platform","supports":["combining languages","embedding languages","creating native images"],"languages": ["Java","JavaScript","Node.js", "Python", "Ruby","R","LLVM"]}}\
+EOF\
+
+: 1681484299:0;chmod a+x ../bin/*
+: 1681484304:0;../bin/check.sh
+: 1681484314:0;nedit ../bin/check.sh
+: 1681484349:0;../bin/check.sh
+: 1681484356:0;nedit ../bin/check.sh&
+: 1681484375:0;../bin/check.sh
+: 1681484477:0;mkdir ../src/sh
+: 1681484486:0;mv ../bin/check.sh ../src/sh
+: 1681484606:0;cp ../src/sh/check.sh ../src/sh/chek-native.sh
+: 1681484617:0;mv ../src/sh/chek-native.sh ../src/sh/check-native.sh
+: 1681484622:0;ant check-native
+: 1681484827:0;ant check
+: 1681486835:0;rm -f build-local.properties\~ build.xml\~ Notes.txt\~ setup.sh\~
+: 1681486957:0;cd ..

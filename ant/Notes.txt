@@ -1,0 +1,32 @@
+--------------------------------------------------------------------------------
+
+* 
+
+--------------------------------------------------------------------------------
+
+Release
+-------
+nedit ant/build-global.properties src/index.html
+ant clean;ant dist
+git commit -m "00.00.00" -a
+git push
+git tag -a 'MultiDemo/00.00.00' -m '00.00.00'
+git push origin --tags
+ant clean;ant jar;ant deploy-prod;ant doc;ant dist;ant post
+
+nedit ant/build-global.properties src/index.html
+ant clean;ant dist
+git commit -m "00.00.00x" -a
+git push
+
+--------------------------------------------------------------------------------
+
+read GraphML via Python
+visualise in JS
+script in Groovy
+write results in C++
+
+send to Spark in Scala
+manipulate with Gremlin
+
+data objects + functions

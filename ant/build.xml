@@ -1,0 +1,326 @@
+<project name="Grapher"
+         default="compile"
+         basedir="../run">
+
+  <description>
+    Grapher
+    </description>
+
+  <!-- Setup ================================================================-->
+
+  <property environment="env"/>
+  <property file="../ant/build-global.properties"/>
+  <property file="../ant/build-local.properties"/>
+
+  <path id="classpath.build">
+    <!--pathelement path="${log4j_jar}"/>
+    <pathelement path="${cli_jar}"/>
+    <pathelement path="${jgrapht_core_jar}"/>
+    <pathelement path="${jgrapht_io_jar}"/>
+    <pathelement path="${jgrapht_ext_jar}"/>
+    <pathelement path="${jgraphx_jar}"/-->
+    <fileset dir="../extlib">
+      <include name="*.jar"/>
+      </fileset>
+    </path>
+
+  <path id="classpath.run">
+    <path refid="classpath.build"/>
+    </path>
+    
+  <property name="classpath.build.content"       refid="classpath.build"/>
+  <property name="classpath.run.content"         refid="classpath.run"/>
+
+  <!-- Init =================================================================-->
+
+  <target name="init"
+          description="Initialise environment">
+    <tstamp>
+      <format property="TSTAMP" pattern="dd/MMM/yyyy 'at' kk:mm:ss z"/>
+      </tstamp>
+    <mkdir dir="../build"/>
+    <mkdir dir="../lib"/>
+    <mkdir dir="../extlib"/>
+    <mkdir dir="../extlib/import"/>
+    <mkdir dir="../run"/>
+    <mkdir dir="../dist"/>
+    <mkdir dir="../doc/JavaDoc"/>
+    <!--copy todir="../extlib/import">
+			<fileset file="${log4j_jar}"/>
+			<fileset file="${cli_jar}"/>
+      <fileset file="${antlr4_runtime_jar}"/>
+      <fileset file="${lang3_jar}"/>
+      <fileset file="${math3_jar}"/>
+      <fileset file="${text_jar}"/>
+      <fileset file="${dsiutils_jar}"/>
+      <fileset file="${fastutil_jar}"/>
+      <fileset file="${guava_jar}"/>
+      <fileset file="${jgrapht_core_jar}"/>
+      <fileset file="${jgrapht_ext_jar}"/>
+      <fileset file="${jgrapht_guava_jar}"/>
+      <fileset file="${jgrapht_io_jar}"/>
+      <fileset file="${jgrapht_opt_jar}"/>
+      <fileset file="${jgrapht_unimi_dsi_jar}"/>
+      <fileset file="${jgraphx_jar}"/>
+      <fileset file="${jheaps_jar}"/>
+      <fileset file="${jsap_jar}"/>
+      <fileset file="${logback_classic_jar}"/>
+      <fileset file="${logback_core_jar}"/>
+      <fileset file="${slf4j_api_jar}"/>
+      <fileset file="${sux4j_jar}"/>
+      <fileset file="${webgraph_jar}"/>
+      <fileset file="${webgraph_jar}"/>
+      <fileset file="${jgraphx_jar}"/>
+      </copy-->
+    </target>
+
+  <!-- Compile ==============================================================-->
+
+  <target name="compile"
+          depends="init"
+          description="Compile sources">
+    <echo message="Using Java version ${ant.java.version}(${java.version})."/>
+    <javac destdir="../build"
+           fork="yes"
+           debug="yes"
+           debuglevel="lines,vars,source"
+           optimize="yes">
+      <src path="../src/java"/>
+      <src path="../build"/>
+      <classpath>
+        <path refid="classpath.build"/>
+        </classpath>
+      </javac>
+    </target>
+    
+  <!-- Create JAR ===========================================================-->
+  
+  <target name="jar"
+          depends="compile"
+          description="Create JAR">
+    <path id="libs">
+      <fileset dir="../extlib">
+        <include name="*.jar"/>
+        <exclude name="*.exe.jar"/>
+        </fileset>
+      </path>
+    <property name="classpath.libs" refid="libs"/>
+    <jar jarfile="../lib/MultiDemo-${version}.jar" index="yes">
+      <fileset dir="../build"    includes="**/*.class"/>
+      <fileset dir="../src/java" includes="**/*.properties"/>
+      <fileset dir="../src/java" includes="**/*.bsh"/>
+      <fileset dir="../src/java" includes="**/*.txt"/>
+      <fileset dir="../src/java" includes="**/*.png"/>
+      <fileset dir="../src/java" includes="**/*.gif"/>
+      <fileset dir="../src/java" includes="**/*.css"/>
+     <manifest>
+        <attribute name="Created-By" value="${user.name}"/>
+        <attribute name="AppName"    value="Grapher"/>
+        <attribute name="AppVersion" value="${MultiDemo} ${TSTAMP}"/>
+        </manifest>
+      </jar>
+    <jar jarfile="../lib/MultiDemo.exe.jar" index="yes">
+      <zipfileset includes="**/*" src="../lib/MultiDemo-${version}.jar" excludes="META-INF/*"/>
+      <!--zipfileset includes="**/*" src="${log4j_jar}"                  excludes="META-INF/*"/>
+      <zipfileset includes="**/*" src="${cli_jar}"                    excludes="META-INF/*"/>
+      <zipfileset includes="**/*" src="${jgrapht_core_jar}"           excludes="META-INF/*"/>
+      <zipfileset includes="**/*" src="${jgrapht_io_jar}"             excludes="META-INF/*"/>
+      <zipfileset includes="**/*" src="${jgrapht_ext_jar}"             excludes="META-INF/*"/>
+      <zipfileset includes="**/*" src="${jgraphx_jar}"             excludes="META-INF/*"/-->
+      <manifest>
+        <attribute name="Created-By" value="${user.name}"/>
+        <attribute name="AppName"    value="MultiDemo"/>
+        <attribute name="AppVersion" value="${version} ${TSTAMP}"/>
+        <attribute name="Main-Class" value="net.hep.MultiDemo.FW"/>
+        </manifest>
+      </jar>
+    </target>
+    
+  <!-- Compile Native =======================================================-->
+    
+  <target name="compile-native"
+          depends="jar"
+          description="Compile into native application">
+    <echo>Compile into native application</echo>
+    <exec executable="${GRAAL_HOME}/bin/native-image">
+      <arg value="--language:js"/>
+      <arg value="--initialize-at-build-time=org.apache.log4j.Level,org.apache.log4j.Logger,org.apache.log4j.helpers.LogLog,org.apache.log4j.Priority,org.apache.log4j.LogManager,org.apache.log4j.helpers.Loader,org.apache.log4j.Category,org.apache.log4j.spi.RootLogger,org.apache.log4j.spi.LoggingEvent,org.slf4j.LoggerFactory,org.slf4j.impl.Log4jLoggerAdapter,org.slf4j.impl.StaticLoggerBinder"/>
+      <arg value="-H:Name=MultiDemo.exe"/>
+      <arg value="-H:Path=../bin"/>
+      <arg value="-jar"/>
+      <arg value="../lib/MultiDemo.exe.jar"/>
+      </exec>
+    </target>
+    
+  <!-- Check ================================================================-->
+    
+  <target name="check"
+           description="Test jar executable">
+    <echo>Test jar executable</echo>
+    <exec dir="../run"
+           executable="../src/sh/check.sh">
+       </exec>
+    </target>
+      
+  <target name="check-native"
+           description="Test native executable">
+    <echo>Test native executable</echo>
+    <exec dir="../run"
+           executable="../src/sh/check-native.sh">
+       </exec>
+    </target>
+  
+  <!-- Clean ================================================================-->
+
+  <target name="clean"
+          depends="init"
+          description="Clean up">
+    <delete includeEmptyDirs="true">
+      <fileset dir="../build" includes="**/*"/>
+      </delete>
+    <delete includeEmptyDirs="true">
+      <fileset dir="../lib" includes="**/*"/>
+      </delete>
+    <delete includeEmptyDirs="true">
+      <fileset dir="../doc" includes="**/*"/>
+      </delete>
+    <delete includeEmptyDirs="true">
+      <fileset dir="../dist" includes="**/*"/>
+      </delete>
+    <!--delete includeEmptyDirs="true">
+      <fileset dir="../extlib/import" includes="**/*"/>
+      </delete-->
+    <delete includeEmptyDirs="true">
+      <fileset dir="." includes="**/*"/>
+      </delete>
+   </target>
+   
+  <!-- Dist =================================================================-->
+
+  <target name="dist"
+          depends="jar"
+          description="Construct distribution">
+    <copy todir="../dist">
+			<fileset dir="../lib" includes="*.jar"/>
+      </copy>
+    <mkdir dir="../dist/jars-${version}"/>
+    <copy todir="../dist/jars-${version}">
+			<fileset dir="../extlib/import" includes="*.jar"/>
+      </copy>
+  </target>
+  
+  <!-- JavaDoc ==============================================================-->
+
+  <target name="doc"
+          depends="jar,viz"
+          description="Construct documentation">
+ 		<copy todir="../doc">
+			<fileset dir="../src" includes="*.html"/>
+			<fileset dir="../src" includes="*.jpeg"/>
+ 			<fileset dir="../src" includes="*.jpg"/>
+     </copy>
+ 		<copy todir="../doc/JavaDoc">
+			<fileset dir="../src/java" includes="**/doc-files/*"/>
+      </copy>
+    <javadoc packagenames="*"
+             sourcepath="../src/java:../build"
+             destdir="../doc/JavaDoc"
+             author="true"
+             version="true"
+             use="true"
+             private="true"
+             additionalparam=" -linksource -breakiterator -keywords -author -version"
+             source="1.8"
+             Overview="../src/java/com/Grapher/overview.html"
+             windowtitle="Grapher">
+      <doctitle><![CDATA[<u>]]>Lomikel<![CDATA[</u>]]></doctitle>
+      <Header><![CDATA[<center>]]>Grapher version: ${version}<![CDATA[</center>]]></Header>
+      <Footer><![CDATA[<center>Written by: <a href='http://cern.ch/hrivnac'>J.Hrivnac</a></center>]]></Footer>
+      <bottom><![CDATA[<a href='https://cern.ch/hrivnac/Activities/Packages/Grapher'>Documentation</a>]]> built ${TODAY} on ${os.name} by ${user.name}</bottom>
+      <group title="Apps"       packages="com.Grapher.Apps*"/>
+      <group title="Convertors" packages="com.Grapher.Convertors*"/>
+      <group title="GUI"        packages="com.Grapher.GUI*"/>
+      <group title="Utils"      packages="com.Grapher.Utils*"/>
+      <group title="Tests"      packages="com.Grapher.Tests*"/>
+      <link href="http://docs.oracle.com/javase/11/docs/api" packagelistLoc="${javadoc}" offline="true"/>
+      <link href="https://commons.apache.org/proper/commons-cli/apidocs"/>
+      <link href="https://logging.apache.org/log4j/1.2/apidocs"/>
+      <link href="https://jgrapht.org/javadoc"/>
+      <classpath>
+        <path refid="classpath.run"/>
+        </classpath>
+      </javadoc>
+    <replace file="../doc/index.html" token="@VERSION@" value="${version}"/>
+    <replace file="../doc/index.html" token="@BUILD@"   value="${TSTAMP} by ${user.name}"/>
+  </target>
+
+  <!-- Post =================================================================-->
+
+  <target name="post"
+          depends="jar,doc,dist"
+          description="Post documentation and distribution">
+    <delete includeEmptyDirs="true">
+      <fileset dir="${doc}" includes="**/*"/>
+      </delete>
+ 		<copy todir="${doc}" force="true">
+			<fileset dir="../doc" includes="**/*"/>
+      </copy>
+    </target>
+
+  <!-- JDepend ==============================================================-->
+
+  <target name="jdepend"
+          depends="init"
+          description="Analyse dependencies">
+    <java classname="jdepend.swingui.JDepend"
+          fork="true"
+          failonerror="true">
+      <arg value="../build"/>
+      <classpath>
+          <pathelement location="../extlib/jdepend-2.9.5.jar"/>
+          </classpath>
+      </java>
+    </target>
+    
+  <!-- Viz ==================================================================-->
+
+  <target name="viz"
+          depends="init"
+          description="Create flow of build file">
+    <taskdef name="vizant" classname="net.sourceforge.vizant.Vizant"> 
+      <classpath>
+        <pathelement location="../extlib/vizant.jar"/>
+        </classpath>
+      </taskdef>
+    <vizant antfile="../ant/build.xml" outfile="../doc/build.dot"/>
+    <exec executable="dot">
+      <arg line="-Tjpg ../doc//build.dot -o ../doc/build.jpg"/> 
+      </exec>       
+    </target>
+
+  <!-- Spot Bugs ============================================================-->  
+
+  <target name="spotbugs"
+          depends="jar"
+          description="SpotBugs Check">
+    <spotbugs home="${spotbugs}"
+              output="html"
+              outputFile="Spotbugs.html" >
+      <auxClasspath refid="classpath.build"/>
+      <sourcePath path="../src/java" />
+      <class location="../lib/Grapher-${version}.jar" />
+      </spotbugs>
+    </target>
+
+  <!-- Clean Imports ========================================================-->  
+
+  <target name="cleanimports"
+          description="Clean Unused Imports">
+    <exec executable="../src/python/remove-unused-imports.py">
+      <arg line="../src/java/com/Grapher"/>
+      </exec>
+    </target>
+ 
+  <!-- ======================================================================-->
+
+  </project>
